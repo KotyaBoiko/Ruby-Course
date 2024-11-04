@@ -4,13 +4,15 @@ class Student
   attr_accessor :surname, :name, :date_of_birth 
   @@students = [];
   def initialize (surname, name, date_of_birth)
+    raise ArgumentError, "Date of birth must be in past" if
+    Date.parse(date_of_birth) > Date.today
     @surname = surname;
     @name = name;
     @date_of_birth = date_of_birth;
   end
 
   def calculate_age 
-    p (Date.today - Date.parse(@date_of_birth)).to_i / 365
+    (Date.today - Date.parse(@date_of_birth)).to_i / 365
   end
 
   def add_student 
@@ -19,7 +21,7 @@ class Student
       name: @name,
       date_of_birth: @date_of_birth,
     }
-    verification(student) ? p("Student already added") : @@students.push(student)
+    Student.verification(student) ? "Student already added" : @@students.push(student)
   end
 
   def remove_student 
@@ -28,29 +30,33 @@ class Student
       name: @name,
       date_of_birth: @date_of_birth,
     }
-    index = verification(student);
+    index = Student.verification(student);
     index ? @@students.delete_at(index) : "Student not found"
   end
 
-  def get_students_by_age(age) 
+  def self.get_students_by_age(age) 
+    studens_by_age = []
     @@students.each do |person|
       if (Date.today - Date.parse(person[:date_of_birth])).to_i / 365 == age
-        p person
+        studens_by_age.push(person)
       end
     end
+    return studens_by_age
   end
 
-  def get_students_by_name(name) 
+  def self.get_students_by_name(name) 
+    students_by_name = []
     @@students.each do |person|
       if person[:name] == name
-        p person
+        students_by_name.push(person)
       end
     end
+    return students_by_name
   end
 
   private
 
-  def verification(student) 
+  def self.verification(student) 
     @@students.each_with_index do |person, index|
       equal = 0
       person.each do |key, value|
@@ -66,14 +72,3 @@ class Student
   end
 
 end
-
-Kostia = Student.new("Boiko", "Kostia", "2005-08-26")
-Sofia = Student.new("Izmalkova", "Sofia", "2005-08-26")
-Kostia.add_student
-Sofia.add_student
-
-Sofia.get_students_by_age(19)
-Kostia.get_students_by_name("Kostia")
-Kostia.remove_student
-
-p Student.class_variable_get("@@students")
